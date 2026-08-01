@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1440" viewBox="0 0 1080 1440">
+  <style>.title{font:700 84px 'Noto Sans CJK SC',sans-serif;fill:#4b2d26}.sub{font:600 38px 'Noto Sans CJK SC',sans-serif;fill:#6d463c}.tag{font:600 30px 'Noto Sans CJK SC',sans-serif;fill:#fffaf2}</style>
+  <rect x="78" y="72" width="924" height="292" rx="58" fill="#fff8ed" fill-opacity=".93" stroke="#5b352c" stroke-width="7"/>
+  <text class="title" x="540" y="190" text-anchor="middle">睡不着的时候</text>
+  <text class="sub" x="540" y="276" text-anchor="middle">有人愿意陪你醒一会儿</text>
+  <rect x="78" y="395" width="250" height="62" rx="31" fill="#765044"/>
+  <text class="tag" x="203" y="437" text-anchor="middle">今晚陪你 · 01</text>
+</svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1440" viewBox="0 0 1080 1440">
+  <style>.note{font:600 41px 'Noto Sans CJK SC',sans-serif;fill:#4b2d26}.body{font:600 34px 'Noto Sans CJK SC',sans-serif;fill:#4b2d26}.end{font:700 42px 'Noto Sans CJK SC',sans-serif;fill:#fffaf2}</style>
+  <rect x="80" y="74" width="920" height="142" rx="36" fill="#fff9f0" fill-opacity=".96" stroke="#5b352c" stroke-width="6"/><text class="note" x="540" y="160" text-anchor="middle">有人陪着，夜就没那么长。</text>
+  <g><rect x="550" y="1015" width="465" height="104" rx="32" fill="#fff1c8" fill-opacity=".96" stroke="#5b352c" stroke-width="6"/><text class="body" x="586" y="1082">九十八只、九十九只……</text></g>
+  <rect x="680" y="1250" width="335" height="94" rx="47" fill="#765044"/><text class="end" x="847" y="1311" text-anchor="middle">晚安，一二。</text>
+</svg>

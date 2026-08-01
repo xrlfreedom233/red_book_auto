@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1440" viewBox="0 0 1080 1440">
+  <style>.body{font:600 40px 'Noto Sans CJK SC',sans-serif;fill:#4b2d26}</style>
+  <g><rect x="74" y="78" width="780" height="110" rx="34" fill="#fff1c8" fill-opacity=".96" stroke="#5b352c" stroke-width="6"/><text class="body" x="112" y="150">一只羊、两只羊、三只羊……</text></g>
+  <g><rect x="380" y="240" width="630" height="110" rx="34" fill="#fff9f0" fill-opacity=".96" stroke="#5b352c" stroke-width="6"/><text class="body" x="418" y="312">你数得也太认真啦。</text></g>
+</svg>

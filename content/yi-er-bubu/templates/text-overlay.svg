@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1440" viewBox="0 0 1080 1440">
+  <title>一二布布双横格页面与对白气泡模板</title>
+  <desc>适用于后续漫画；白色外画布上下两个横向画格，气泡尾尖必须指向对应说话角色。</desc>
+  <defs>
+    <!-- 透明窗口保留底图，白色区域强制覆盖成页面留白。 -->
+    <mask id="page-margins" maskUnits="userSpaceOnUse" x="0" y="0" width="1080" height="1440">
+      <rect width="1080" height="1440" fill="white"/>
+      <rect x="64" y="72" width="952" height="582" rx="14" fill="black"/>
+      <rect x="64" y="726" width="952" height="582" rx="14" fill="black"/>
+    </mask>
+  </defs>
+  <style>
+    .panel-border { fill: none; stroke: #211b19; stroke-width: 10; stroke-linejoin: round; }
+    .bubble { fill: #ffffff; stroke: #211b19; stroke-width: 8; stroke-linejoin: round; }
+    .dialogue { font: 700 44px 'Noto Sans CJK SC', sans-serif; fill: #171312; text-anchor: middle; }
+    .caption { font: 600 34px 'Noto Sans CJK SC', sans-serif; fill: #4b2d26; text-anchor: middle; }
+  </style>
+
+  <!-- 固定版式：外安全区 x=64..1016；上格 y=72..654；下格 y=726..1308；中间留白 72px。 -->
+  <rect width="1080" height="1440" fill="#ffffff" mask="url(#page-margins)"/>
+  <g id="panel-frames">
+    <rect class="panel-border" x="64" y="72" width="952" height="582" rx="14"/>
+    <rect class="panel-border" x="64" y="726" width="952" height="582" rx="14"/>
+  </g>
+
+  <!-- 示例气泡 1：尾尖位于 (445,329)，当前指向上格右下方的说话者。 -->
+  <g id="dialogue-bubble-top">
+    <path class="bubble" d="M 140,202 C 140,145 195,112 325,112 C 455,112 510,145 510,202 C 510,248 474,276 410,287 L 445,329 L 375,292 C 230,295 140,263 140,202 Z"/>
+    <text class="dialogue" x="325" y="190">
+      <tspan x="325" dy="0">第一行对白</tspan>
+      <tspan x="325" dy="58">第二行对白</tspan>
+    </text>
+  </g>
+
+  <!-- 示例气泡 2：尾尖位于 (650,986)，当前指向下格左下方的说话者。 -->
+  <g id="dialogue-bubble-bottom">
+    <path class="bubble" d="M 570,858 C 570,802 625,770 755,770 C 885,770 940,802 940,858 C 940,916 865,948 720,948 L 650,986 L 674,944 C 609,934 570,906 570,858 Z"/>
+    <text class="dialogue" x="755" y="846">
+      <tspan x="755" dy="0">第一行对白</tspan>
+      <tspan x="755" dy="58">第二行对白</tspan>
+    </text>
+  </g>
+
+  <!-- 旁白不使用尾巴；如不需要可删除整组，不得把它当成角色对白。 -->
+  <g id="optional-caption" display="none">
+    <rect x="340" y="1336" width="400" height="64" rx="18" fill="#fffaf2" stroke="#5b352c" stroke-width="5"/>
+    <text class="caption" x="540" y="1380">可选旁白</text>
+  </g>
+</svg>
