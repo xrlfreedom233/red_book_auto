@@ -1,0 +1,2 @@
+{"file":".trellis/spec/backend/index.md","reason":"Backend guideline index used during final quality review."}
+{"file":".trellis/spec/backend/automation-integration-contracts.md","reason":"Verification source for save-draft-only behavior, host pinning, recoverable failures, and container safety."}

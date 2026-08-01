@@ -17,6 +17,17 @@ async function assertSafePage(page) {
   }
 }
 
+export async function waitForUploadControl(page, timeoutMs) {
+  const upload = page.locator('input[type="file"]').first();
+  try {
+    await upload.waitFor({ state: "attached", timeout: timeoutMs });
+    return upload;
+  } catch (cause) {
+    await assertSafePage(page);
+    throw new PipelineError("image upload control was not found", { category: "page_changed", recoverable: true, cause });
+  }
+}
+
 const loopbackHosts = new Set(["127.0.0.1", "::1", "localhost"]);
 
 export function validateDraftTarget(value, mock) {
@@ -55,8 +66,9 @@ export async function saveDraft({ config, episode, imageFiles, runDir }) {
     await page.goto(target, { waitUntil: "domcontentloaded", timeout: config.requestTimeoutMs });
     validateDraftTarget(page.url(), config.mock);
     await assertSafePage(page);
-    const upload = page.locator('input[type="file"]').first();
-    if (!(await upload.isVisible().catch(() => false)) && await upload.count() === 0) throw new PipelineError("image upload control was not found", { category: "page_changed", recoverable: true });
+    const upload = await waitForUploadControl(page, config.requestTimeoutMs);
+    validateDraftTarget(page.url(), config.mock);
+    await assertSafePage(page);
     await upload.setInputFiles(imageFiles);
     await page.getByRole("textbox", { name: /标题/ }).fill(episode.publish.title);
     const body = page.getByRole("textbox", { name: /正文|描述|内容/ });

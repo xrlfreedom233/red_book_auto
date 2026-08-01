@@ -65,12 +65,13 @@ Every stage records status, attempt count, input digest, safe output paths, time
 | `MAX_TEXT_CALLS`, `MAX_IMAGE_CALLS` | Required limits | Non-negative integer budgets validated before execution |
 | `MAX_RETRIES` | Optional | Non-negative integer; zero must disable retries |
 | `TZ` / cron `CRON_TZ` | Scheduled mode | `Asia/Shanghai` for the 09:00 daily trigger |
+| `HOME` | Docker browser runtime | Point to a writable tmpfs path such as `/tmp`; Chromium crash reporting may terminate at launch when HOME is on the read-only image |
 
 The live character sheet must be a regular non-symlink PNG, read-only to the runtime user, 100 bytes–15 MiB, 512–4096 pixels on each axis, with valid PNG chunks, CRCs, `IDAT`, terminal `IEND`, and no trailing data. Only its basename, dimensions, size, and SHA-256 may be persisted. Its in-memory data URL may be sent in the supported single `image` field and must be redacted from responses and errors.
 
 #### Browser draft boundary
 
-Live browser navigation is pinned to HTTPS on `creator.xiaohongshu.com`; every redirect is revalidated. Mock browser mode is restricted to loopback. The automation may upload images, fill copy, and click only the exact “保存草稿” action. It must not contain a publish-button selector, replay a private endpoint, extract cookies/signatures, bypass challenges, or infer success from an ambiguous page.
+Live browser navigation is pinned to HTTPS on `creator.xiaohongshu.com`; every redirect is revalidated. Mock browser mode is restricted to loopback. After `domcontentloaded`, the creator SPA may still show a skeleton screen, so the adapter must wait up to `REQUEST_TIMEOUT_MS` for the first `input[type="file"]` to become attached. Hidden file inputs are valid upload controls and must not be rejected for invisibility. On timeout, re-check human-verification signals before returning a recoverable page-change failure. The automation may upload images, fill copy, and click only the exact “保存草稿” action. It must not contain a publish-button selector, replay a private endpoint, extract cookies/signatures, bypass challenges, or infer success from an ambiguous page.
 
 #### External response boundaries
 
@@ -96,14 +97,16 @@ Live browser navigation is pinned to HTTPS on `creator.xiaohongshu.com`; every r
 | Model JSON violates contract | Stop stage; never feed raw output downstream |
 | Changed character-sheet SHA-256 | Invalidate image stages and downstream output |
 | Browser leaves pinned host or sees challenge | Stop, capture redacted evidence, never publish |
+| Creator page remains a skeleton before upload controls attach | Wait within `REQUEST_TIMEOUT_MS`; then classify challenge vs. recoverable page change |
+| Chromium HOME resolves to the read-only image | Reject the deployment shape; Compose must provide writable tmpfs-backed HOME |
 | Draft result is ambiguous | Mark draft failed/partial; require manual upload |
 | DingTalk HTTP 200 with `errcode != 0` | Notification failure, content state preserved |
 
 ### 5. Good / Base / Bad Cases
 
 - **Good:** A 09:00 job validates secrets and the read-only character sheet, generates five pages, saves a draft, records `pending_review`, and sends a signed DingTalk message. A second same-date invocation returns the same run ID without model calls.
-- **Base:** Generation succeeds but the browser login expired. The publish package remains intact and pending review, draft status fails with a safe screenshot, and DingTalk tells the operator to log in or upload manually.
-- **Bad:** A job accepts a stale `passed` image after its reference SHA changes, logs a data URL, retries an authentication failure, follows a redirect to another host, or searches for a “发布” button. These behaviors violate this specification.
+- **Base:** Generation succeeds but the creator SPA is still loading or the browser login expired. The adapter waits for the upload control, then preserves the publish package and records a safe recoverable failure if readiness or login cannot be confirmed.
+- **Bad:** A job accepts a stale `passed` image after its reference SHA changes, logs a data URL, retries an authentication failure, treats `domcontentloaded` as upload readiness, follows a redirect to another host, or searches for a “发布” button. These behaviors violate this specification.
 
 ### 6. Tests Required
 
@@ -119,6 +122,7 @@ Unit and integration tests must assert:
 8. DingTalk signs exactly once, checks business `errcode`, and preserves the content outcome on notification failure;
 9. mock end-to-end runs twice with one run ID and produces the required 1080×1440 PNG set;
 10. repository, logs, fixtures, image layers, and process arguments contain no credential material.
+11. delayed hidden upload controls are awaited in the attached state, timeout preserves page-change/human-verification classification, and both Docker services inherit writable HOME without weakening the read-only runtime.
 
 ### 7. Wrong vs Correct
 
@@ -129,6 +133,7 @@ Unit and integration tests must assert:
 budget.imageCalls += 1;
 await request({ image: await fs.readFile(referencePath, "base64") });
 await page.goto(config.url);
+if (await page.locator('input[type="file"]').count() === 0) throw new Error("page changed");
 await page.getByText("发布").click();
 ```
 
@@ -140,6 +145,10 @@ assertAllowedCreatorUrl(config.url);
 budget.assertImageAvailable();
 budget.imageCalls += 1;
 await request({ image: reference.dataUrl });
+await page.locator('input[type="file"]').first().waitFor({
+  state: "attached",
+  timeout: requestTimeoutMs
+});
 await page.getByRole("button", { name: "保存草稿", exact: true }).click();
 ```
 

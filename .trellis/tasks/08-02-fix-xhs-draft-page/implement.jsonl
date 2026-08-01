@@ -1,0 +1,2 @@
+{"file":".trellis/spec/backend/index.md","reason":"Backend guideline index for the automation package."}
+{"file":".trellis/spec/backend/automation-integration-contracts.md","reason":"Required safety and recovery contracts for browser drafts, Docker secrets, and external UI automation."}

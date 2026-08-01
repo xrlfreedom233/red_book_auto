@@ -8,6 +8,7 @@ x-runtime: &runtime
   init: true
   read_only: true
   environment:
+    HOME: /tmp
     DAILY_ROOT: /data/daily
     CHARACTER_REFERENCE_ROOT: /references
     CHARACTER_SHEET_NAME: ${CHARACTER_SHEET_NAME:-character-sheet.png}
