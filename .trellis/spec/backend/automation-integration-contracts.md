@@ -101,6 +101,7 @@ Live browser navigation is pinned to HTTPS on `creator.xiaohongshu.com`; every r
 | Creator page defaults to a video-only file input | Activate exact `上传图文`, then select by image `accept`; never select by DOM order |
 | Exact image-note labels have zero or multiple actionable candidates | Trial only, capture evidence, and return recoverable page change without a real click |
 | Body editor is a ProseMirror textbox without placeholder attributes | Require the observed unique class/contenteditable/role contract; fail recoverably if missing or ambiguous |
+| A trailing hashtag opens the topic-suggestion overlay | Dismiss it with one `Escape` keypress before checking the draft action; do not click a suggested topic or publish control |
 | Draft action label is `暂存离开` beside red `发布`, but has no button role | Reuse exact-text plus unique-actionability selection; never select by position, color, or partial publish text |
 | Chromium HOME resolves to the read-only image | Reject the deployment shape; Compose must provide writable tmpfs-backed HOME |
 | Draft result is ambiguous | Mark draft failed/partial; require manual upload |

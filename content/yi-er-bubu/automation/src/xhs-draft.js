@@ -65,6 +65,7 @@ export async function fillDraftBody(page, text, timeoutMs) {
     await body.waitFor({ state: "visible", timeout: timeoutMs });
     if (await body.count() !== 1) throw new Error("draft body control was ambiguous");
     await body.fill(text, { timeout: timeoutMs });
+    await page.keyboard.press("Escape");
   } catch (cause) {
     await assertSafePage(page);
     throw new PipelineError("an unambiguous draft body control was not found", { category: "page_changed", recoverable: true, cause });

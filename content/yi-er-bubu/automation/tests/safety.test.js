@@ -124,6 +124,7 @@ test("draft upload timeout preserves human-verification classification", async (
 
 test("draft body uses the observed ProseMirror textbox contract", async () => {
   let filled = "";
+  let pressed = "";
   const body = {
     waitFor: async (options) => assert.deepEqual(options, { state: "visible", timeout: 4321 }),
     count: async () => 1,
@@ -136,8 +137,10 @@ test("draft body uses the observed ProseMirror textbox contract", async () => {
     locator(selector) {
       assert.equal(selector, 'div.tiptap.ProseMirror[contenteditable="true"][role="textbox"]');
       return body;
-    }
+    },
+    keyboard: { press: async (key) => { pressed = key; } }
   };
   await fillDraftBody(page, "正文\n#话题", 4321);
   assert.equal(filled, "正文\n#话题");
+  assert.equal(pressed, "Escape");
 });
