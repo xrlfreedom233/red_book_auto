@@ -96,6 +96,7 @@ test("draft upload rejects an ambiguous image-note mode", async () => {
     nth: () => candidate
   };
   await assert.rejects(activateImageUpload(draftPage(null, { imageMode }), 25), (error) => {
+    assert.match(error.message, /targets=2, actionable=2/);
     assert.equal(error.category, "page_changed");
     assert.equal(error.recoverable, true);
     return true;

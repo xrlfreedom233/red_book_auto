@@ -28,19 +28,23 @@ const draftBodySelector = 'div.tiptap.ProseMirror[contenteditable="true"][role="
 
 export async function clickUniqueExactText(page, label, timeoutMs, errorMessage) {
   const targets = page.getByText(label, { exact: true });
+  let targetCount = 0;
+  let actionableCount = 0;
   try {
     await targets.first().waitFor({ state: "attached", timeout: timeoutMs });
     const actionable = [];
     const trialTimeout = Math.min(timeoutMs, 3000);
-    for (let index = 0; index < await targets.count(); index += 1) {
+    targetCount = await targets.count();
+    for (let index = 0; index < targetCount; index += 1) {
       const candidate = targets.nth(index);
       if (await candidate.click({ trial: true, timeout: trialTimeout }).then(() => true, () => false)) actionable.push(candidate);
     }
-    if (actionable.length !== 1) throw new Error("image-note control was not uniquely actionable");
+    actionableCount = actionable.length;
+    if (actionableCount !== 1) throw new Error("exact-text control was not uniquely actionable");
     await actionable[0].click({ timeout: timeoutMs });
   } catch (cause) {
     await assertSafePage(page);
-    throw new PipelineError(errorMessage, { category: "page_changed", recoverable: true, cause });
+    throw new PipelineError(`${errorMessage} (targets=${targetCount}, actionable=${actionableCount})`, { category: "page_changed", recoverable: true, cause });
   }
 }
 
@@ -119,6 +123,7 @@ export async function saveDraft({ config, episode, imageFiles, runDir }) {
     await upload.setInputFiles(imageFiles);
     await page.getByRole("textbox", { name: /标题/ }).fill(episode.publish.title);
     await fillDraftBody(page, `${episode.publish.body}\n${episode.publish.tags.map((tag) => `#${tag}`).join(" ")}`, config.requestTimeoutMs);
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
     await clickUniqueExactText(page, "暂存离开", config.requestTimeoutMs, "an unambiguous save-draft control was not found");
     const confirmation = page.getByText(/已保存至草稿|草稿保存成功|保存成功|暂存成功|已暂存/).first();
     await confirmation.waitFor({ state: "visible", timeout: 15000 }).catch(() => {

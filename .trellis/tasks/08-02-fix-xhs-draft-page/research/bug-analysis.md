@@ -9,6 +9,7 @@
 - **Editor Evidence**: After image upload and title fill, the body is a contenteditable region identified by `输入正文描述，真诚有价值的分享予人温暖`; the safe final action is the white `暂存离开` button next to a forbidden red `发布` button.
 - **DOM Probe**: The sole editor is `DIV.tiptap.ProseMirror[contenteditable=true][role=textbox]` with no placeholder or accessible label. `暂存离开` is absent from the ARIA button list, so role-based lookup cannot find it.
 - **Overlay Evidence**: Filling the final hashtag opens a topic-suggestion panel above the footer. The panel persists after `fill` and prevents the safe draft action from passing actionability checks; a non-mutating `Escape` dismissal is required.
+- **Render Evidence**: The exact draft label is absent during pre-screenshot lookup but visible in the subsequent full-page screenshot, indicating that the bottom action region is scroll/full-layout dependent rather than a stable initial DOM control.
 
 ### 2. Why the First Fix Failed
 
