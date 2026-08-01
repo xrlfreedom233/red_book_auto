@@ -24,6 +24,7 @@ const imageUploadSelector = [
   'input[type="file"][accept*=".png"]',
   'input[type="file"][accept*=".webp"]'
 ].join(", ");
+const draftBodySelector = '[contenteditable="true"][data-placeholder="输入正文描述，真诚有价值的分享予人温暖"]';
 
 export async function activateImageUpload(page, timeoutMs) {
   const targets = page.getByText("上传图文", { exact: true });
@@ -51,6 +52,18 @@ export async function waitForUploadControl(page, timeoutMs) {
   } catch (cause) {
     await assertSafePage(page);
     throw new PipelineError("image upload control was not found", { category: "page_changed", recoverable: true, cause });
+  }
+}
+
+export async function fillDraftBody(page, text, timeoutMs) {
+  const body = page.locator(draftBodySelector);
+  try {
+    await body.waitFor({ state: "visible", timeout: timeoutMs });
+    if (await body.count() !== 1) throw new Error("draft body control was ambiguous");
+    await body.fill(text, { timeout: timeoutMs });
+  } catch (cause) {
+    await assertSafePage(page);
+    throw new PipelineError("an unambiguous draft body control was not found", { category: "page_changed", recoverable: true, cause });
   }
 }
 
@@ -100,12 +113,11 @@ export async function saveDraft({ config, episode, imageFiles, runDir }) {
     await assertSafePage(page);
     await upload.setInputFiles(imageFiles);
     await page.getByRole("textbox", { name: /标题/ }).fill(episode.publish.title);
-    const body = page.getByRole("textbox", { name: /正文|描述|内容/ });
-    await body.fill(`${episode.publish.body}\n${episode.publish.tags.map((tag) => `#${tag}`).join(" ")}`);
-    const save = page.getByRole("button", { name: /^保存草稿$/ });
+    await fillDraftBody(page, `${episode.publish.body}\n${episode.publish.tags.map((tag) => `#${tag}`).join(" ")}`, config.requestTimeoutMs);
+    const save = page.getByRole("button", { name: /^暂存离开$/ });
     if (await save.count() !== 1) throw new PipelineError("an unambiguous save-draft control was not found", { category: "page_changed", recoverable: true });
     await save.click();
-    const confirmation = page.getByText(/已保存至草稿|草稿保存成功|保存成功/).first();
+    const confirmation = page.getByText(/已保存至草稿|草稿保存成功|保存成功|暂存成功|已暂存/).first();
     await confirmation.waitFor({ state: "visible", timeout: 15000 }).catch(() => {
       throw new PipelineError("draft result could not be verified", { category: "result_unclear", recoverable: true });
     });

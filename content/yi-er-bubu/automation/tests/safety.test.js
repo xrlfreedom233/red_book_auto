@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { activateImageUpload, validateDraftTarget, waitForUploadControl } from "../src/xhs-draft.js";
+import { activateImageUpload, fillDraftBody, validateDraftTarget, waitForUploadControl } from "../src/xhs-draft.js";
 
 function draftPage(upload, { blocked = false, imageMode } = {}) {
   return {
@@ -28,7 +28,7 @@ test("browser automation exposes only image-mode and save-draft actions", async 
   assert.equal([...source.matchAll(/\.click\(/g)].length, 3);
   assert.equal([...source.matchAll(/click\(\{ trial: true,/g)].length, 1);
   assert.match(source, /上传图文/);
-  assert.match(source, /保存草稿/);
+  assert.match(source, /暂存离开/);
   assert.doesNotMatch(source, /发布笔记/);
   assert.doesNotMatch(source, /route\(|request\.post|context\.cookies|document\.cookie/);
 });
@@ -120,4 +120,24 @@ test("draft upload timeout preserves human-verification classification", async (
     assert.equal(error.recoverable, true);
     return true;
   });
+});
+
+test("draft body uses the exact contenteditable placeholder contract", async () => {
+  let filled = "";
+  const body = {
+    waitFor: async (options) => assert.deepEqual(options, { state: "visible", timeout: 4321 }),
+    count: async () => 1,
+    fill: async (text, options) => {
+      filled = text;
+      assert.deepEqual(options, { timeout: 4321 });
+    }
+  };
+  const page = {
+    locator(selector) {
+      assert.equal(selector, '[contenteditable="true"][data-placeholder="输入正文描述，真诚有价值的分享予人温暖"]');
+      return body;
+    }
+  };
+  await fillDraftBody(page, "正文\n#话题", 4321);
+  assert.equal(filled, "正文\n#话题");
 });
