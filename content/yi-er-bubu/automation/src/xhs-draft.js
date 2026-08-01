@@ -26,11 +26,17 @@ const imageUploadSelector = [
 ].join(", ");
 
 export async function activateImageUpload(page, timeoutMs) {
-  const target = page.getByText("上传图文", { exact: true });
+  const targets = page.getByText("上传图文", { exact: true });
   try {
-    await target.waitFor({ state: "visible", timeout: timeoutMs });
-    if (await target.count() !== 1) throw new Error("image-note control was ambiguous");
-    await target.click();
+    await targets.first().waitFor({ state: "attached", timeout: timeoutMs });
+    const actionable = [];
+    const trialTimeout = Math.min(timeoutMs, 3000);
+    for (let index = 0; index < await targets.count(); index += 1) {
+      const candidate = targets.nth(index);
+      if (await candidate.click({ trial: true, timeout: trialTimeout }).then(() => true, () => false)) actionable.push(candidate);
+    }
+    if (actionable.length !== 1) throw new Error("image-note control was not uniquely actionable");
+    await actionable[0].click({ timeout: timeoutMs });
   } catch (cause) {
     await assertSafePage(page);
     throw new PipelineError("an unambiguous image-note control was not found", { category: "page_changed", recoverable: true, cause });

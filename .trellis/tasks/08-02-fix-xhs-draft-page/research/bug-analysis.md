@@ -4,6 +4,8 @@
 
 - **Category**: E - Implicit Assumption, with D - Test Coverage Gap
 - **Specific Cause**: The adapter assumed the first file input belonged to image notes. The real creator page defaults to `上传视频`; its first input accepts `.mp4,.mov,...` and is single-file. Unit tests modeled only one generic upload input and therefore could not expose the content-type distinction.
+- **Follow-up Evidence**: The real DOM contains three visible `SPAN.title` nodes with exact text `上传图文`, so strict text uniqueness also fails. A semantic exact label must be combined with Playwright actionability, not raw node count.
+- **Actionability Probe**: A live non-mutating trial-click probe returned `[false, false, true]`, confirming exactly one of the three duplicate labels can receive the content-type click.
 
 ### 2. Why the First Fix Failed
 
@@ -16,6 +18,7 @@
 |---|---|---|---|
 | P0 | Architecture | Select a file input by explicit image `accept` contract, never DOM order | Done |
 | P0 | Runtime safety | Require an exact, unambiguous `上传图文` transition and revalidate host afterward | Done |
+| P0 | Runtime safety | Resolve duplicate exact labels with non-mutating trial clicks and require one actionable candidate | Done |
 | P0 | Test coverage | Assert the upload locator carries an image `accept` contract and never uses a generic first input | Done |
 | P1 | Documentation | Record creator SPA readiness and content-type contracts in the automation spec | Done |
 

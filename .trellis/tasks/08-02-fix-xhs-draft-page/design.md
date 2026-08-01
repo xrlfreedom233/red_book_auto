@@ -6,7 +6,7 @@ The change stays inside the existing browser-draft adapter and shared Compose ru
 
 ## Browser Readiness
 
-After navigation and creator-host validation, the adapter requires exactly one visible text target named `上传图文` and clicks it to switch away from the default video mode. It then waits for a file input whose `accept` attribute explicitly includes an image MIME type or supported image extension to reach Playwright's `attached` state. Hidden file inputs are valid upload controls, so visibility is not required. The wait uses the configured request timeout.
+After navigation and creator-host validation, the adapter enumerates exact text targets named `上传图文`. The creator currently renders three duplicate `SPAN.title` nodes, so DOM count and visibility are insufficient. Playwright trial clicks identify candidates that are visible, stable, enabled, and able to receive pointer events without performing the action. The adapter clicks only when exactly one candidate is actionable. It then waits for a file input whose `accept` attribute explicitly includes an image MIME type or supported image extension to reach Playwright's `attached` state. Hidden file inputs are valid upload controls, so visibility is not required. The waits use the configured request timeout, with each non-mutating trial bounded to three seconds.
 
 If attachment times out, the adapter re-checks the existing human-verification signals before classifying the result. A challenge therefore remains `human_verification`; an otherwise loaded but incompatible page remains recoverable `page_changed`. The normal outer failure handler captures the redacted screenshot in both cases.
 

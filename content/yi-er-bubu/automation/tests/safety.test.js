@@ -25,7 +25,8 @@ test("browser automation exposes only image-mode and save-draft actions", async 
   const source = await readFile(path.resolve("src/xhs-draft.js"), "utf8");
   const buttonActions = [...source.matchAll(/getByRole\("button"/g)];
   assert.equal(buttonActions.length, 1);
-  assert.equal([...source.matchAll(/\.click\(\)/g)].length, 2);
+  assert.equal([...source.matchAll(/\.click\(/g)].length, 3);
+  assert.equal([...source.matchAll(/click\(\{ trial: true,/g)].length, 1);
   assert.match(source, /上传图文/);
   assert.match(source, /保存草稿/);
   assert.doesNotMatch(source, /发布笔记/);
@@ -61,29 +62,45 @@ test("draft upload waits for a delayed hidden file input to attach", async () =>
 });
 
 test("draft upload switches to the exact image-note mode", async () => {
-  let clicked = false;
+  const clicks = [0, 0, 0];
+  const candidates = [false, true, false].map((actionable, index) => ({
+    async click(options) {
+      if (options.trial) {
+        assert.equal(options.timeout, 3000);
+        if (!actionable) throw new Error("not actionable");
+        return;
+      }
+      assert.deepEqual(options, { timeout: 4321 });
+      clicks[index] += 1;
+    }
+  }));
   const imageMode = {
-    waitFor: async (options) => assert.deepEqual(options, { state: "visible", timeout: 4321 }),
-    count: async () => 1,
-    click: async () => { clicked = true; }
+    first: () => ({ waitFor: async (options) => assert.deepEqual(options, { state: "attached", timeout: 4321 }) }),
+    count: async () => candidates.length,
+    nth: (index) => candidates[index]
   };
   await activateImageUpload(draftPage(null, { imageMode }), 4321);
-  assert.equal(clicked, true);
+  assert.deepEqual(clicks, [0, 1, 0]);
 });
 
 test("draft upload rejects an ambiguous image-note mode", async () => {
-  let clicked = false;
+  let realClicks = 0;
+  const candidate = {
+    async click(options) {
+      if (!options.trial) realClicks += 1;
+    }
+  };
   const imageMode = {
-    waitFor: async () => {},
+    first: () => ({ waitFor: async () => {} }),
     count: async () => 2,
-    click: async () => { clicked = true; }
+    nth: () => candidate
   };
   await assert.rejects(activateImageUpload(draftPage(null, { imageMode }), 25), (error) => {
     assert.equal(error.category, "page_changed");
     assert.equal(error.recoverable, true);
     return true;
   });
-  assert.equal(clicked, false);
+  assert.equal(realClicks, 0);
 });
 
 test("draft upload timeout is a recoverable page-change failure", async () => {
