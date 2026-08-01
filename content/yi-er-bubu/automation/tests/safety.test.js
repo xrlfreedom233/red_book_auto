@@ -24,11 +24,11 @@ function draftPage(upload, { blocked = false, imageMode } = {}) {
 test("browser automation exposes only image-mode and save-draft actions", async () => {
   const source = await readFile(path.resolve("src/xhs-draft.js"), "utf8");
   const buttonActions = [...source.matchAll(/getByRole\("button"/g)];
-  assert.equal(buttonActions.length, 1);
-  assert.equal([...source.matchAll(/\.click\(/g)].length, 3);
+  assert.equal(buttonActions.length, 0);
+  assert.equal([...source.matchAll(/\.click\(/g)].length, 2);
   assert.equal([...source.matchAll(/click\(\{ trial: true,/g)].length, 1);
-  assert.match(source, /上传图文/);
-  assert.match(source, /暂存离开/);
+  assert.equal([...source.matchAll(/clickUniqueExactText\(page, "上传图文"/g)].length, 1);
+  assert.equal([...source.matchAll(/clickUniqueExactText\(page, "暂存离开"/g)].length, 1);
   assert.doesNotMatch(source, /发布笔记/);
   assert.doesNotMatch(source, /route\(|request\.post|context\.cookies|document\.cookie/);
 });
@@ -122,7 +122,7 @@ test("draft upload timeout preserves human-verification classification", async (
   });
 });
 
-test("draft body uses the exact contenteditable placeholder contract", async () => {
+test("draft body uses the observed ProseMirror textbox contract", async () => {
   let filled = "";
   const body = {
     waitFor: async (options) => assert.deepEqual(options, { state: "visible", timeout: 4321 }),
@@ -134,7 +134,7 @@ test("draft body uses the exact contenteditable placeholder contract", async () 
   };
   const page = {
     locator(selector) {
-      assert.equal(selector, '[contenteditable="true"][data-placeholder="输入正文描述，真诚有价值的分享予人温暖"]');
+      assert.equal(selector, 'div.tiptap.ProseMirror[contenteditable="true"][role="textbox"]');
       return body;
     }
   };

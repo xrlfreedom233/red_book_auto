@@ -7,6 +7,7 @@
 - **Follow-up Evidence**: The real DOM contains three visible `SPAN.title` nodes with exact text `上传图文`, so strict text uniqueness also fails. A semantic exact label must be combined with Playwright actionability, not raw node count.
 - **Actionability Probe**: A live non-mutating trial-click probe returned `[false, false, true]`, confirming exactly one of the three duplicate labels can receive the content-type click.
 - **Editor Evidence**: After image upload and title fill, the body is a contenteditable region identified by `输入正文描述，真诚有价值的分享予人温暖`; the safe final action is the white `暂存离开` button next to a forbidden red `发布` button.
+- **DOM Probe**: The sole editor is `DIV.tiptap.ProseMirror[contenteditable=true][role=textbox]` with no placeholder or accessible label. `暂存离开` is absent from the ARIA button list, so role-based lookup cannot find it.
 
 ### 2. Why the First Fix Failed
 

@@ -24,10 +24,10 @@ const imageUploadSelector = [
   'input[type="file"][accept*=".png"]',
   'input[type="file"][accept*=".webp"]'
 ].join(", ");
-const draftBodySelector = '[contenteditable="true"][data-placeholder="输入正文描述，真诚有价值的分享予人温暖"]';
+const draftBodySelector = 'div.tiptap.ProseMirror[contenteditable="true"][role="textbox"]';
 
-export async function activateImageUpload(page, timeoutMs) {
-  const targets = page.getByText("上传图文", { exact: true });
+export async function clickUniqueExactText(page, label, timeoutMs, errorMessage) {
+  const targets = page.getByText(label, { exact: true });
   try {
     await targets.first().waitFor({ state: "attached", timeout: timeoutMs });
     const actionable = [];
@@ -40,8 +40,12 @@ export async function activateImageUpload(page, timeoutMs) {
     await actionable[0].click({ timeout: timeoutMs });
   } catch (cause) {
     await assertSafePage(page);
-    throw new PipelineError("an unambiguous image-note control was not found", { category: "page_changed", recoverable: true, cause });
+    throw new PipelineError(errorMessage, { category: "page_changed", recoverable: true, cause });
   }
+}
+
+export async function activateImageUpload(page, timeoutMs) {
+  await clickUniqueExactText(page, "上传图文", timeoutMs, "an unambiguous image-note control was not found");
 }
 
 export async function waitForUploadControl(page, timeoutMs) {
@@ -114,9 +118,7 @@ export async function saveDraft({ config, episode, imageFiles, runDir }) {
     await upload.setInputFiles(imageFiles);
     await page.getByRole("textbox", { name: /标题/ }).fill(episode.publish.title);
     await fillDraftBody(page, `${episode.publish.body}\n${episode.publish.tags.map((tag) => `#${tag}`).join(" ")}`, config.requestTimeoutMs);
-    const save = page.getByRole("button", { name: /^暂存离开$/ });
-    if (await save.count() !== 1) throw new PipelineError("an unambiguous save-draft control was not found", { category: "page_changed", recoverable: true });
-    await save.click();
+    await clickUniqueExactText(page, "暂存离开", config.requestTimeoutMs, "an unambiguous save-draft control was not found");
     const confirmation = page.getByText(/已保存至草稿|草稿保存成功|保存成功|暂存成功|已暂存/).first();
     await confirmation.waitFor({ state: "visible", timeout: 15000 }).catch(() => {
       throw new PipelineError("draft result could not be verified", { category: "result_unclear", recoverable: true });

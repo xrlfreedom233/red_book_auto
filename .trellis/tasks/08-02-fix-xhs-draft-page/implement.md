@@ -5,7 +5,7 @@
 3. Preserve error ordering by checking human-verification signals after readiness failures, then emit the existing recoverable `page_changed` error when appropriate.
 4. Revalidate the creator URL after the content-type transition and before uploading.
 5. Add focused unit tests for the exact action allowlist, video-input exclusion, delayed image attachment, and timeout behavior.
-6. Fill the body through its exact `contenteditable` placeholder contract and change the final exact draft action to `暂存离开`.
+6. Fill the body through the observed ProseMirror textbox contract and invoke final `暂存离开` through the shared exact-text/actionability helper because it is not an ARIA button.
 7. Keep `HOME=/tmp` in the shared Compose runtime so both login and daily draft execution inherit it.
 8. Run the Node tests, lint, Compose config validation, and a source scan for forbidden publish/private-endpoint behaviors.
 9. Review the diff for secrets, generated screenshots, or unrelated dirty-worktree files before committing only task-owned changes.

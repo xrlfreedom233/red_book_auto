@@ -10,7 +10,7 @@ After navigation and creator-host validation, the adapter enumerates exact text 
 
 If attachment times out, the adapter re-checks the existing human-verification signals before classifying the result. A challenge therefore remains `human_verification`; an otherwise loaded but incompatible page remains recoverable `page_changed`. The normal outer failure handler captures the redacted screenshot in both cases.
 
-The body editor is selected through the exact current `contenteditable` and `data-placeholder="输入正文描述，真诚有价值的分享予人温暖"` contract because it has no usable accessible name. The click allowlist contains only the exact content-type action `上传图文` and the exact white draft action `暂存离开`. It never targets the red `发布` action, `发布笔记`, any other publish action, or a private endpoint. Direct navigation remains pinned to `https://creator.xiaohongshu.com` and is revalidated after the content-type transition.
+The body editor is selected through the observed unique `div.tiptap.ProseMirror[contenteditable="true"][role="textbox"]` contract; the visible placeholder is not an element attribute. The `暂存离开` control is not exposed as an ARIA button, so both approved actions reuse the exact-text plus unique-actionability mechanism. The click allowlist contains only `上传图文` and the exact white draft action `暂存离开`. It never targets the red `发布` action, `发布笔记`, any other publish action, or a private endpoint. Direct navigation remains pinned to `https://creator.xiaohongshu.com` and is revalidated after the content-type transition.
 
 ## Container Runtime
 
