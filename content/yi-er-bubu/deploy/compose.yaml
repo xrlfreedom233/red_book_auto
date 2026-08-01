@@ -1,0 +1,56 @@
+name: yi-er-bubu
+
+x-runtime: &runtime
+  build:
+    context: ..
+    dockerfile: deploy/Dockerfile
+  image: yi-er-bubu-daily:local
+  init: true
+  read_only: true
+  environment:
+    DAILY_ROOT: /data/daily
+    CHARACTER_REFERENCE_ROOT: /references
+    CHARACTER_SHEET_NAME: ${CHARACTER_SHEET_NAME:-character-sheet.png}
+    XHS_PROFILE_ROOT: /data/browser-profile
+    ARK_API_KEY_FILE: /run/secrets/ark_api_key
+    DINGTALK_WEBHOOK_FILE: /run/secrets/dingtalk_webhook
+    DINGTALK_SECRET_FILE: /run/secrets/dingtalk_secret
+    ENABLE_XHS_DRAFT: ${ENABLE_XHS_DRAFT:-false}
+    MAX_TEXT_CALLS: ${MAX_TEXT_CALLS:-4}
+    MAX_IMAGE_CALLS: ${MAX_IMAGE_CALLS:-7}
+    MAX_RETRIES: ${MAX_RETRIES:-2}
+    REQUEST_TIMEOUT_MS: ${REQUEST_TIMEOUT_MS:-120000}
+  volumes:
+    - ../daily:/data/daily
+    - ${CHARACTER_REFERENCE_DIR:-../references}:/references:ro
+    - ../daily/browser-profile:/data/browser-profile
+  secrets:
+    - ark_api_key
+    - dingtalk_webhook
+    - dingtalk_secret
+  tmpfs:
+    - /tmp:size=1g,mode=1777
+  security_opt:
+    - no-new-privileges:true
+
+services:
+  daily:
+    <<: *runtime
+    command: ["run", "--live"]
+
+  login:
+    <<: *runtime
+    profiles: ["login"]
+    entrypoint: ["/app/content/deploy/login-entrypoint.sh"]
+    command: []
+    ports:
+      - "127.0.0.1:6080:6080"
+    shm_size: 1gb
+
+secrets:
+  ark_api_key:
+    file: ${ARK_API_KEY_HOST_FILE:-./secrets/ark_api_key.example}
+  dingtalk_webhook:
+    file: ${DINGTALK_WEBHOOK_HOST_FILE:-./secrets/dingtalk_webhook.example}
+  dingtalk_secret:
+    file: ${DINGTALK_SECRET_HOST_FILE:-./secrets/dingtalk_secret.example}

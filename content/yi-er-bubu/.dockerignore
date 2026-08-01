@@ -1,0 +1,8 @@
+.env.local
+daily
+references
+automation/node_modules
+deploy/.env
+deploy/secrets/*
+!deploy/secrets/*.example
+npm-debug.log*

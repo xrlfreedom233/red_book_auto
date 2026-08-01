@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Ubuntu Noble ships ImageMagick 6 without the IM7 `magick` dispatcher used by
+# the existing content-package renderer. Keep that renderer's interface stable.
+if [[ ${1:-} == "identify" ]]; then
+  shift
+  exec identify "$@"
+fi
+exec convert "$@"

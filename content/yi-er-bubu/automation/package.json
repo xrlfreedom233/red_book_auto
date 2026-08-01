@@ -1,0 +1,18 @@
+{
+  "name": "yi-er-bubu-daily-automation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/cli.js",
+    "login": "node src/cli.js login",
+    "test": "node --test",
+    "lint": "node --check src/*.js && node --check tests/*.js"
+  },
+  "optionalDependencies": {
+    "playwright": "1.54.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

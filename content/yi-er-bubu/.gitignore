@@ -1,0 +1,9 @@
+.env.local
+daily/
+deploy/.env
+deploy/secrets/*
+!deploy/secrets/*.example
+browser-profile/
+references/*
+!references/README.md
+npm-debug.log*
