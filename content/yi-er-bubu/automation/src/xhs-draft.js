@@ -17,8 +17,28 @@ async function assertSafePage(page) {
   }
 }
 
+const imageUploadSelector = [
+  'input[type="file"][accept*="image/"]',
+  'input[type="file"][accept*=".jpg"]',
+  'input[type="file"][accept*=".jpeg"]',
+  'input[type="file"][accept*=".png"]',
+  'input[type="file"][accept*=".webp"]'
+].join(", ");
+
+export async function activateImageUpload(page, timeoutMs) {
+  const target = page.getByText("上传图文", { exact: true });
+  try {
+    await target.waitFor({ state: "visible", timeout: timeoutMs });
+    if (await target.count() !== 1) throw new Error("image-note control was ambiguous");
+    await target.click();
+  } catch (cause) {
+    await assertSafePage(page);
+    throw new PipelineError("an unambiguous image-note control was not found", { category: "page_changed", recoverable: true, cause });
+  }
+}
+
 export async function waitForUploadControl(page, timeoutMs) {
-  const upload = page.locator('input[type="file"]').first();
+  const upload = page.locator(imageUploadSelector).first();
   try {
     await upload.waitFor({ state: "attached", timeout: timeoutMs });
     return upload;
@@ -64,6 +84,9 @@ export async function saveDraft({ config, episode, imageFiles, runDir }) {
   await mkdir(path.dirname(screenshot), { recursive: true });
   try {
     await page.goto(target, { waitUntil: "domcontentloaded", timeout: config.requestTimeoutMs });
+    validateDraftTarget(page.url(), config.mock);
+    await assertSafePage(page);
+    await activateImageUpload(page, config.requestTimeoutMs);
     validateDraftTarget(page.url(), config.mock);
     await assertSafePage(page);
     const upload = await waitForUploadControl(page, config.requestTimeoutMs);
